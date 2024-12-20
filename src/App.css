@@ -1,0 +1,79 @@
+.main{
+ display: flex;
+ width: 100%;
+ height: 100%;
+ overflow: hidden;
+ align-items: center;
+ justify-content: start;
+ flex-direction: column;
+ padding: 10px;
+}
+.mamuContainer{
+  width: 100%;
+  display: flex;
+  gap: 1rem;
+}
+.response{
+  color:#fff;
+  width: 50%;
+  font-size: 2vw;
+  margin-top: 10px;
+}
+.mamu{
+ width:20%;
+
+ margin: 0 auto;
+ border-radius: 100% ;
+
+}
+.aivoice{
+
+  width:50%;
+  margin: 0 auto;
+}
+.speak{
+  position: relative;
+  width:7%;
+  margin: 0 auto;
+}
+.hide{
+  display: none;
+}
+.show{
+  display:block;
+}
+span{
+background:linear-gradient(to right,rgb(0, 234, 255), rgb(212, 0, 255));
+padding: 10px;
+font-size:2vw;
+background-clip:text;
+color:transparent;
+}
+
+button{
+
+ font-size:2vw;
+ cursor: pointer;
+ outline: none;
+ border: none;
+ background-clip:text;
+ color: #fff;
+ border-radius: 100%;
+}
+/* button:hover {
+ animation: mamulafao 0.5s ease-in-out infinite;
+} */
+button:active {
+color:#00eeff
+}
+@keyframes mamulafao {
+ 0% {
+   transform: scale(1);
+ }
+ 50% {
+   transform: scale(1.2);
+ }
+ 100% {
+   transform: scale(1);
+ }
+}
