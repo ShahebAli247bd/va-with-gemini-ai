@@ -17,7 +17,7 @@ const App = () => {
     stopSpeaking,
   } = useContext(dataContext);
 
-  const [displayedResponse, setDisplayedResponse] = useState("");
+  const [displayedResponse, setDisplayedResponse] = useState([]);
   const [input, setInput] = useState("Hello Shaheb Ali, How are you?");
   const [showLip, setShowLip] = useState(false);
   const [aiVoice, setAiVoice] = useState(false);
@@ -25,24 +25,48 @@ const App = () => {
 
   useEffect(() => {
     if (response) {
+      setDisplayedResponse([]); // Always set as an array
+
       setAiVoice(true);
       setShowLip(false);
       setIsListeningState(false);
-      const words = response.split(" ");
+
+      // Regex to identify code blocks wrapped in triple backticks
+      const parts = response.split(/(```[\s\S]*?```)/);
+      const formattedResponse = [];
+
       let currentIndex = 0;
 
       const intervalId = setInterval(() => {
-        if (currentIndex < words.length) {
-          setDisplayedResponse((prev) => prev + " " + words[currentIndex]);
+        if (currentIndex < parts.length) {
+          const part = parts[currentIndex];
+          if (part.startsWith("```") && part.endsWith("```")) {
+            // It's a code block; strip the backticks and push
+            formattedResponse.push({
+              type: "code",
+              content: part.slice(3, -3),
+            });
+          } else {
+            // It's plain text
+            formattedResponse.push({
+              type: "text",
+              content: part,
+            });
+          }
           currentIndex++;
+          // Update displayed response
+          setDisplayedResponse([...formattedResponse]);
         } else {
           clearInterval(intervalId);
         }
-      }, 200); // Adjust timing between words as needed
+      }, 200); // Adjust timing between parts as needed
 
+      // Cleanup interval on unmount or response change
       return () => clearInterval(intervalId);
+    } else {
+      // Clear displayed response if no response
+      setDisplayedResponse([]);
     }
-    setDisplayedResponse("");
   }, [response]);
 
   function resumeRecognition() {
@@ -50,7 +74,7 @@ const App = () => {
     setIsListeningState(true);
     setDisplayedResponse("");
     recognition.start(); // Restart listening
-    console.log("Speech recognition resumed.");
+    console.log("Speech recognition listening.");
   }
 
   recognition.onend = () => {
@@ -61,10 +85,21 @@ const App = () => {
   };
 
   function pauseRecognition() {
-    recognition.stop(); // Stop listening temporarily
+    recognition.stop();
+
     setShowLip(false);
     setIsListeningState(false);
     console.log("Speech recognition paused.");
+  }
+
+  function stopSpeakingAndStartNew() {
+    stopSpeaking();
+    setDisplayedResponse([]);
+    setIsListeningState(false);
+    setShowLip(false);
+    setAiVoice(false);
+    setInput("");
+    window.location.reload();
   }
 
   return (
@@ -75,29 +110,47 @@ const App = () => {
 
       <span>Mamu 1.0 is your Virtual Assistant, Ask Anything!</span>
 
-      {}
-
       <button>
         {aiVoice ? (
-          <img
-            src={aiVoiceImg}
-            className={aiVoice ? "show aivoice" : "hide aivoice"}
-            alt="AI Speaking"
-          />
+          <>
+            <div>
+              <img
+                src={aiVoiceImg}
+                className={aiVoice ? "show aivoice" : "hide aivoice"}
+                alt="AI Speaking"
+              />
+            </div>
+            <div>
+              <CiMicrophoneOff
+                className="icon"
+                onClick={stopSpeakingAndStartNew}
+              />
+            </div>
+          </>
         ) : isListeningState ? (
-          <img src={speak} className="speak" alt="Listening..." />
+          <>
+            <div>
+              <img src={speak} className="speak" alt="Listening..." />
+            </div>
+          </>
         ) : (
-          <Suspense fallback={<div>Listening...</div>}>
-            <CiMicrophoneOn className="icon" onClick={resumeRecognition} />
-          </Suspense>
+          <CiMicrophoneOn className="icon" onClick={resumeRecognition} />
         )}
       </button>
-      <button>
-        <CiMicrophoneOff className="icon" onClick={pauseRecognition} />
-      </button>
-      <Suspense fallback={<div>Thinking...</div>}>
-        <div className="response">{displayedResponse}</div>
-      </Suspense>
+
+      <div className="response">
+        {Array.isArray(displayedResponse) &&
+          displayedResponse.map((part, index) => {
+            if (part.type === "code") {
+              return (
+                <pre className="code-block" key={index}>
+                  <code>{part.content}</code>
+                </pre>
+              );
+            }
+            return <p key={index}>{part.content}</p>;
+          })}
+      </div>
     </div>
   );
 };

@@ -19,6 +19,15 @@
   font-size: 2vw;
   margin-top: 10px;
 }
+.code-block{
+  background-color: #2d2d2d; /* Dark background for code */
+  color: #f8f8f2;          /* Light text for contrast */
+  font-family: "Courier New", Courier, monospace;
+  padding: 1rem;
+  border-radius:10px;
+  overflow-x: auto;        /* Handle long lines */
+  margin-bottom: 15px;     /* Add spacing */
+}
 .mamu{
  width:20%;
 
